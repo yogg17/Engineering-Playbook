@@ -1,0 +1,304 @@
+#!/usr/bin/bash
+
+# This script demonstrates core Bash concepts through small, focused examples.
+# The main function acts as the interactive driver and calls each exercise.
+
+readonly BASH_PATH="/usr/bin"
+readonly BASH_FILE="./assets/bash_files.txt"
+readonly MEM_INFO_FILE="./assets/mem_info.txt"
+readonly SOURCE_TEXT_FILE="./assets/test_file.txt"
+readonly MODIFIED_TEXT_FILE="./assets/modified_test_file.txt"
+readonly DEFAULT_UPTIME_LABEL="Uptime of the machine"
+readonly LIST_OF_COLORS=("red" "green" "blue")
+
+print_divider() {
+    printf '\n============================================================\n'
+}
+
+print_section() {
+    local title="$1"
+    print_divider
+    printf '%s\n' "$title"
+    print_divider
+}
+
+# positionalArguments
+# Purpose: Demonstrates how Bash positional parameters ($1, $2, $3, ...) are
+# passed into a function and accessed in order.
+# Inputs: Three sample string arguments.
+# Output: Prints each argument on its own line to show how function parameters
+# map to positional variables.
+positionalArguments() {
+    echo "$1"
+    echo "$2"
+    echo "$3"
+}
+
+# piping
+# Purpose: Demonstrates the pipe operator (|), which sends the output of one
+# command directly into another command.
+# Inputs: No direct parameters. Uses the global BASH_PATH constant.
+# Output: Lists files in /usr/bin and filters the result down to entries that
+# contain the word "bash".
+piping() {
+    print_section "Piping Example"
+    echo "Listing files in ${BASH_PATH} and filtering for bash-related entries:"
+    ls -l "$BASH_PATH" | grep "bash"
+}
+
+# redirection
+# Purpose: Demonstrates output redirection (>, >>) and input redirection (<).
+# It also shows how command output can be stored in files for later processing.
+# Inputs: No direct parameters. Uses the BASH_PATH constant and writes to the
+# practice output files in the current directory.
+# Output: Creates bash_files.txt and cpu_info.txt, then reads them back.
+redirection() {
+    print_section "Redirection Example"
+
+    echo "Saving bash-related entries from ${BASH_PATH} into ${BASH_FILE}:"
+    ls -l "$BASH_PATH" | grep "bash" > "$BASH_FILE"
+
+    echo
+    echo "Contents of ${BASH_FILE}:"
+    cat "$BASH_FILE"
+
+    echo
+    echo "Reading ${BASH_FILE} using input redirection:"
+    cat < "$BASH_FILE"
+
+    echo
+    echo "Word count of ${BASH_FILE}:"
+    wc < "$BASH_FILE"
+
+    echo
+    echo "Line count of ${BASH_FILE}:"
+    wc -l < "$BASH_FILE"
+
+    echo
+    echo "Saving memory information into ${MEM_INFO_FILE}:"
+    free -h > "$MEM_INFO_FILE"
+    cat "$MEM_INFO_FILE"
+}
+
+# testoperators
+# Purpose: Demonstrates test expressions using [ ] for string and numeric
+# comparisons, followed by a small if/elif/else decision block.
+# Inputs: One string argument used for the conditional greeting.
+# Output: Prints the result of each test expression and then prints a message
+# based on the provided argument.
+testoperators() {
+    local name="${1,,}"
+
+    print_section "Test Operators Example"
+    [ "hello" = "hello" ] && echo "Strings are equal" || echo "Strings are not equal"
+    [ 1 = 0 ] && echo "Numbers are equal" || echo "Numbers are not equal"
+    [ 1 -eq 1 ] && echo "Numbers are equal" || echo "Numbers are not equal"
+    [ 5 -gt 3 ] && echo "5 is greater than 3" || echo "5 is not greater than 3"
+
+    echo
+    if [ "$name" = "yogg" ]; then
+        echo "Hello, Yogg!"
+    elif [ "$name" = "help" ]; then
+        echo "Usage: $0 [name|help]"
+    else
+        echo "I do not understand. Please provide a name or type 'help' for usage information."
+    fi
+}
+
+# caseStatements
+# Purpose: Demonstrates a case statement, which is often cleaner than several
+# chained if/elif checks when matching one value against many options.
+# Inputs: One string argument that is normalized to lowercase before matching.
+# Output: Prints a message for the matched role or a fallback message.
+caseStatements() {
+    local role="${1,,}"
+
+    print_section "Case Statement Example"
+    case "$role" in
+        yogg | administrator)
+            echo "Hello, Yogg or Administrator!"
+            ;;
+        developer)
+            echo "Hello, Developer!"
+            ;;
+        *)
+            echo "I do not understand. Please provide a name or type 'help' for usage information."
+            ;;
+    esac
+}
+
+# arrays
+# Purpose: Demonstrates how indexed arrays store multiple values in one
+# variable and how individual elements can be accessed.
+# Inputs: No direct parameters. Uses the global LIST_OF_COLORS array.
+# Output: Prints the whole array and then prints each element by index.
+arrays() {
+    print_section "Arrays Example"
+    echo "All colors: ${LIST_OF_COLORS[*]}"
+    echo "Index 0: ${LIST_OF_COLORS[0]}"
+    echo "Index 1: ${LIST_OF_COLORS[1]}"
+    echo "Index 2: ${LIST_OF_COLORS[2]}"
+}
+
+# loops
+# Purpose: Demonstrates a for loop by iterating through a list of colors and
+# printing both the value and its string length.
+# Inputs: No direct parameters. Uses the global LIST_OF_COLORS array.
+# Output: Prints one line per color while iterating through the array.
+loops() {
+    local color
+
+    print_section "Loops Example"
+    echo "Using a for loop to iterate over colors:"
+    for color in "${LIST_OF_COLORS[@]}"; do
+        echo "Color: ${color} | Length: ${#color}"
+    done
+}
+
+# showuptime
+# Purpose: Demonstrates command substitution and here documents while also
+# showing the difference between local function state and global script state.
+# Inputs: No direct parameters.
+# Output: Prints the system uptime in a formatted block and then preserves the
+# original label outside the function.
+showuptime() {
+    local current_uptime
+    local since
+
+    print_section "System Uptime Example"
+    current_uptime="$(uptime -p)"
+    since="$(uptime -s)"
+
+    cat <<EOF
+System Uptime: ${current_uptime}
+Since: ${since}
+EOF
+
+    echo
+    echo "Global label remains unchanged: ${DEFAULT_UPTIME_LABEL}"
+}
+
+# areaOfSquare
+# Purpose: Demonstrates arithmetic expansion in Bash.
+# Inputs: One numeric argument representing the side length of a square.
+# Output: Prints the computed area using the formula side * side.
+areaOfSquare() {
+    local side="$1"
+    local area=$((side * side))
+
+    print_section "Arithmetic Example"
+    echo "Area of the square with side ${side} is: ${area}"
+}
+
+# awkfunction
+# Purpose: Demonstrates a simple awk command for extracting structured data
+# from a text file.
+# Inputs: No direct parameters. Reads from test_file.txt in the current
+# directory.
+# Output: Prints the first word from each line of the file.
+awkfunction() {
+    print_section "AWK Example"
+    echo "First word of each line in ${SOURCE_TEXT_FILE}:"
+    awk '{print $1}' "$SOURCE_TEXT_FILE"
+}
+
+# sedfunction
+# Purpose: Demonstrates text replacement with sed and a simple content search
+# with grep.
+# Inputs: No direct parameters. Reads from test_file.txt and writes the updated
+# content to modified_test_file.txt before restoring the original wording.
+# Output: Shows the modified file, searches for the replaced phrase, and then
+# writes the original wording back into test_file.txt.
+sedfunction() {
+    local old_word="brown"
+    local new_word="light brown"
+
+    print_section "SED Example"
+    echo "Replacing '${old_word}' with '${new_word}' in ${SOURCE_TEXT_FILE}:"
+    sed "s/${old_word}/${new_word}/g" "$SOURCE_TEXT_FILE" > "$MODIFIED_TEXT_FILE"
+
+    echo
+    echo "Contents of ${MODIFIED_TEXT_FILE}:"
+    cat "$MODIFIED_TEXT_FILE"
+
+    echo
+    echo "Searching for '${new_word}' in ${MODIFIED_TEXT_FILE}:"
+    grep "${new_word}" "$MODIFIED_TEXT_FILE"
+
+    echo
+    echo "Reverting '${new_word}' back to '${old_word}' in ${SOURCE_TEXT_FILE}:"
+    sed "s/${new_word}/${old_word}/g" "$MODIFIED_TEXT_FILE" > "$SOURCE_TEXT_FILE"
+    cat "$SOURCE_TEXT_FILE"
+}
+
+# mainfunction
+# Purpose: Acts as the selector and driver for the script. It presents an
+# interactive menu, reads the user's choice, and dispatches execution to the
+# corresponding demonstration function.
+# Inputs: Reads one menu option from standard input. Option 9 also reads a side
+# length for the square example.
+# Output: Displays a formatted menu and runs exactly one selected exercise.
+mainfunction() {
+    local option
+    local side
+
+    print_section "Bash Practice Menu"
+    echo "Choose an option to demonstrate:"
+    echo "  1) Positional Arguments"
+    echo "  2) Piping"
+    echo "  3) Redirection"
+    echo "  4) Test Operators"
+    echo "  5) Case Statements"
+    echo "  6) Arrays"
+    echo "  7) Loops"
+    echo "  8) Show System Uptime"
+    echo "  9) Calculate Area of a Square"
+    echo " 10) AWK Function"
+    echo " 11) SED Function"
+    echo
+
+    read -r -p "Enter your option: " option
+
+    case "$option" in
+        1)
+            positionalArguments "Hello" "World" "!"
+            ;;
+        2)
+            piping
+            ;;
+        3)
+            redirection
+            ;;
+        4)
+            testoperators "Yogg"
+            ;;
+        5)
+            caseStatements "Administrator"
+            ;;
+        6)
+            arrays
+            ;;
+        7)
+            loops
+            ;;
+        8)
+            showuptime
+            ;;
+        9)
+            read -r -p "Enter the side length of the square: " side
+            areaOfSquare "$side"
+            ;;
+        10)
+            awkfunction
+            ;;
+        11)
+            sedfunction
+            ;;
+        *)
+            echo "Invalid option. Please choose a number between 1 and 11."
+            exit 1
+            ;;
+    esac
+}
+
+mainfunction

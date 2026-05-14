@@ -1,0 +1,4 @@
+-rwxr-xr-x  1 root root        1154680 Aug 26  2025 bash
+lrwxrwxrwx  1 root root             10 Aug 26  2025 bashbug -> bashbug-64
+-rwxr-xr-x  1 root root           7348 Aug 26  2025 bashbug-64
+lrwxrwxrwx  1 root root              4 Aug 26  2025 sh -> bash
